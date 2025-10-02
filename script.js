@@ -66,7 +66,7 @@ fetch("u6.geojson")
     // Create GeoJSON layer
     const u6Layer = L.geoJSON(data, {
       style: {
-        color: "blue",       // line / polygon color
+        color: "#FF0000",       // line / polygon color
         weight: 2,           // line thickness
         fillOpacity: 0.3,    // fill opacity for polygons
       },
