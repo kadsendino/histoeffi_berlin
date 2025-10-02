@@ -36,9 +36,9 @@ let config = {
 };
 
 var baseLayers = {
-  "OSM Mapnik": osmMap,
-  CartoDB: landMap,
-  BaseMapDE_Grey: degreyMap,
+  //"OSM Mapnik": osmMap,
+  //CartoDB: landMap,
+  Berlin: degreyMap,
 };
 
 //calling map
@@ -54,13 +54,36 @@ const markersLayer = L.layerGroup([marker,marker2]);
 
 //--------------------------------------------------------------------------------
 
-var overlays = {
-  "Berlin Marker": markersLayer,
-};
-
 // Add both base and overlays to the control
-layerControl.addOverlay(markersLayer, "Berlin Marker");
+layerControl.addOverlay(markersLayer, "MarkerTest");
 markersLayer.addTo(map); // ensures it's visible on start
+
+//-----------------------------------------------------------------
+
+fetch("u6.geojson")
+  .then((response) => response.json())
+  .then((data) => {
+    // Create GeoJSON layer
+    const u6Layer = L.geoJSON(data, {
+      style: {
+        color: "blue",       // line / polygon color
+        weight: 2,           // line thickness
+        fillOpacity: 0.3,    // fill opacity for polygons
+      },
+      onEachFeature: function (feature, layer) {
+        // Optional: bind popup for each feature
+        if (feature.properties && feature.properties.name) {
+          layer.bindPopup(feature.properties.name);
+        }
+      },
+    });
+
+    // Add it to layer control and show it by default
+    layerControl.addOverlay(u6Layer, "U6 GeoJSON");
+    u6Layer.addTo(map);
+  })
+  .catch((err) => console.error("Failed to load GeoJSON:", err));
+
 
 //-------------------------------------------------------------------
 
