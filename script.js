@@ -5,41 +5,69 @@ const lat = 52.5051;
 const lng = 13.3855;
 
 
-// Used to load and display tile layers on the map
-// Most tile servers require attribution, which you can set under `Layer`
-// L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-//   attribution:
-//     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-// }).addTo(map);
-//
-const htmlTemplate =
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M32 18.451L16 6.031 0 18.451v-5.064L16 .967l16 12.42zM28 18v12h-8v-8h-8v8H4V18l12-9z" /></svg>';
+// === Tile Layers ===
+var OpenStreetMap_HOT = L.tileLayer(
+  'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+  {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+                 'Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> ' +
+                 'hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>'
+  }
+);
 
-//base_layers
-const osmLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-const cartoDB = '<a href="http://cartodb.com/attributions">CartoDB</a>';
-const osmUrl = "http://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const osmAttrib = `&copy; ${osmLink} Contributors`;
-const landUrl = "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png";
-const cartoAttrib = `&copy; ${osmLink} Contributors & ${cartoDB}`;
-const degreyUrl = "https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/de_basemapde_web_raster_grau/default/GLOBAL_WEBMERCATOR/{z}/{y}/{x}.png"
-const degreyAttrib = `&copy;${osmLink} Contributors & ${cartoDB} & <a href="http://www.govdata.de/dl-de/by-2-0">dl-de/by-2-0</a>`
+var Stadia_AlidadeSmooth = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.{ext}', {
+	minZoom: 0,
+	maxZoom: 20,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'
+});
 
-const osmMap = L.tileLayer(osmUrl, { attribution: osmAttrib });
-const landMap = L.tileLayer(landUrl, { attribution: cartoAttrib });
-const degreyMap = L.tileLayer(degreyUrl, { attribution: degreyAttrib });
+var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}', {
+	minZoom: 0,
+	maxZoom: 20,
+	attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	ext: 'png'
+});
 
+var osmMap = L.tileLayer(
+  "http://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  { attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> Contributors' }
+);
+
+var landMap = L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}.png",
+  { attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> Contributors & <a href="http://cartodb.com/attributions">CartoDB</a>' }
+);
+
+var degreyMap = L.tileLayer(
+  "https://sgx.geodatenzentrum.de/wmts_basemapde/tile/1.0.0/de_basemapde_web_raster_grau/default/GLOBAL_WEBMERCATOR/{z}/{y}/{x}.png",
+  { attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> Contributors & <a href="http://cartodb.com/attributions">CartoDB</a> & <a href="http://www.govdata.de/dl-de/by-2-0">dl-de/by-2-0</a>' }
+);
+
+// === Map Configuration ===
 let config = {
   minZoom: 7,
   maxZoom: 18,
-  layers: [degreyMap],
+  layers: [degreyMap], // Default initial layer
 };
 
+// === Base Layers Object for Layer Control ===
 var baseLayers = {
-  //"OSM Mapnik": osmMap,
-  //CartoDB: landMap,
-  Berlin: degreyMap,
+  "OSM HOT": OpenStreetMap_HOT,
+  "OSM Mapnik": osmMap,
+  "CartoDB": landMap,
+  "Berlin": degreyMap,
+  "Stadia": Stadia_AlidadeSmooth,
+  "StadiaDark": Stadia_AlidadeSmoothDark,
 };
+
+// === SVG Marker Template ===
+const htmlTemplate = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <path d="M32 18.451L16 6.031 0 18.451v-5.064L16 .967l16 12.42zM28 18v12h-8v-8h-8v8H4V18l12-9z" />
+</svg>`;
+
 
 //calling map
 const map = L.map("map", config).setView([lat, lng], zoom);
@@ -47,46 +75,73 @@ var layerControl = L.control.layers(baseLayers).addTo(map);
 //-----------------------------------------------------------
 
 
-const marker = L.marker([52.52983, 13.3855]).addTo(map).bindPopup("Text");
-const marker2 = L.marker([52.50983, 13.3955]).addTo(map).bindPopup("Text");
+// const marker = L.marker([52.52983, 13.3855]).addTo(map).bindPopup("Text");
+// const marker2 = L.marker([52.50983, 13.3955]).addTo(map).bindPopup("Text");
+//
+// const markersLayer = L.layerGroup([marker,marker2]);
+//
+// //--------------------------------------------------------------------------------
+//
+// // Add both base and overlays to the control
+// layerControl.addOverlay(markersLayer, "MarkerTest");
+// markersLayer.addTo(map); // ensures it's visible on start
 
-const markersLayer = L.layerGroup([marker,marker2]);
 
-//--------------------------------------------------------------------------------
+function add_layer(file,name){
+  function get_color(feature, name) {
+    const defaults = {
+      "U-Bahn": "#FF00FF",   
+      "S-Bahn": "#018A47",   
+      "Tram": "#BE1414",     
+      "Bus": "#95276E",      
+      "Fähre": "#0080BA"     
+    };
+    // Use feature color if available, otherwise default for this layer
+    return feature.properties.colour || defaults[name] || "#FF00FF"; // fallback magenta
+  }
 
-// Add both base and overlays to the control
-layerControl.addOverlay(markersLayer, "MarkerTest");
-markersLayer.addTo(map); // ensures it's visible on start
 
-//-----------------------------------------------------------------
+  fetch(file)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      // use geoJSON
+      const ubahnLayer = L.geoJSON(data, {
+        style: function (feature) {
+          return {
+            color: get_color(feature, name), // fallback red
+            weight: 2,
+            fillOpacity: 1
+          };
+        },
+        pointToLayer: function (feature, latlng) {
+          const ubahnIcon = L.icon({
+            iconUrl: name+".svg",   // Pfad zu deiner SVG-Datei
+            iconSize: [10, 10],      // gewünschte Breite, Höhe in Pixel
+            iconAnchor: [0, 0],    // Ankerpunkt (Mitte unten)
+            popupAnchor: [0, -10]    // Position des Popups relativ zum Icon
+          });
 
-fetch("u6.geojson")
-  .then((response) => response.json())
-  .then((data) => {
-    // Create GeoJSON layer
-    const u6Layer = L.geoJSON(data, {
-      style: {
-        color: "#FF0000",       // line / polygon color
-        weight: 2,           // line thickness
-        fillOpacity: 0.3,    // fill opacity for polygons
-      },
-      onEachFeature: function (feature, layer) {
-        // Optional: bind popup for each feature
-        if (feature.properties && feature.properties.name) {
-          layer.bindPopup(feature.properties.name);
-        }
-      },
-    });
+          return; //L.marker(latlng, { icon: ubahnIcon });
+        },
+        onEachFeature: function onEachFeature(feature, layer) {
+              layer.bindPopup(feature.properties.name);
+        },
+      });
+      const iconLabel = `<img src="${name}.svg" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"> ${name}`;
+      layerControl.addOverlay(ubahnLayer, iconLabel);
+      ubahnLayer.addTo(map);
+  });
+}
 
-    // Add it to layer control and show it by default
-    layerControl.addOverlay(u6Layer, "U6 GeoJSON");
-    u6Layer.addTo(map);
-  })
-  .catch((err) => console.error("Failed to load GeoJSON:", err));
-
+add_layer("ubahn.geojson","U-Bahn");
+add_layer("sbahn.geojson","S-Bahn");
+add_layer("tram.geojson","Tram");
+add_layer("bus.geojson","Bus");
+add_layer("ferry.geojson","Fähre");
 
 //-------------------------------------------------------------------
-
 
 // create custom button
 const customControl = L.Control.extend({
@@ -140,3 +195,16 @@ function getCenterOfMap() {
 }
 
 const compareToArrays = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+// ------------------------------------------------------------
+// async function to get data from json
+async function fetchData(url) {
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
